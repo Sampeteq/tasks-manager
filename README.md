@@ -11,6 +11,10 @@ User:
 
 POST /registration - register a new user
 
+/POST /login - login
+
+/Post /logout - logout
+
 PATCH /user/password - change user password
 
 DELETE /user - remove user
