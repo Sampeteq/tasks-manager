@@ -22,9 +22,9 @@ class CustomUserDetailsService implements UserDetailsService {
     return userFacade
         .getUserAuthDTO(userName)
         .map(userAuthDTO -> User.builder()
-                    .username(userAuthDTO.getUsername())
-                    .password(userAuthDTO.getPassword())
-                    .authorities(userAuthDTO.getRole())
+                    .username(userAuthDTO.username())
+                    .password(userAuthDTO.password())
+                    .authorities(userAuthDTO.role())
                     .build())
         .getOrElseThrow(() -> new UsernameNotFoundException(userName));
   }

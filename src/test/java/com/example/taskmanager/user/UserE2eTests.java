@@ -52,7 +52,7 @@ class UserE2eTests {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(registerUserDTOasJson));
     // then
-    var registeredUser = userFacade.readUserByUsername(registerUserDTO.getUsername()).get();
+    var registeredUser = userFacade.readUserByUsername(registerUserDTO.username()).get();
     assertThat(registeredUser).isNotNull();
     resultActions.andExpect(status().isCreated());
   }
@@ -63,7 +63,7 @@ class UserE2eTests {
     // given
     var command = new RegisterUserDTO(wrongUsername, "12345");
     var jsonCommand = toJson(command);
-    var expectedError = new WrongUsernameLengthError(command.getUsername());
+    var expectedError = new WrongUsernameLengthError(command.username());
     var jsonExpectedError = toJson(expectedError);
     // when
     var resultActions = mockMvc.perform(post("/registration")
@@ -79,7 +79,7 @@ class UserE2eTests {
   void return_error_and_400_when_username_is_not_unique() throws Exception {
     // given
     var sampleUser= addSampleUser();
-    var registerUserDTO = new RegisterUserDTO(sampleUser.getUsername(), "12345");
+    var registerUserDTO = new RegisterUserDTO(sampleUser.username(), "12345");
     var registerUserDTOasJson = toJson(registerUserDTO);
     var expectedError = new NotUniqueUserNameError();
     var expectedErrorAsJson = toJson(expectedError);
@@ -99,7 +99,7 @@ class UserE2eTests {
     // given
     var dto = new RegisterUserDTO("user1", generateTooShortPassword());
     var jsonCommand = toJson(dto);
-    var expectedError = new WrongPasswordLengthError(dto.getPassword());
+    var expectedError = new WrongPasswordLengthError(dto.password());
     var jsonExpectedError = toJson(expectedError);
     // when
     var resultActions =
@@ -117,8 +117,8 @@ class UserE2eTests {
   void change_password_and_return_200() throws Exception {
     // given
     var sampleUser= addSampleUser();
-    var oldPassword = sampleUser.getUsername();
-    var changePasswordDTO = new ChangeUserPasswordDTO(sampleUser.getUsername(), "newPassword");
+    var oldPassword = sampleUser.username();
+    var changePasswordDTO = new ChangeUserPasswordDTO(sampleUser.username(), "newPassword");
     var changePasswordDTOAsJson = toJson(changePasswordDTO);
 
     // when
@@ -128,7 +128,7 @@ class UserE2eTests {
                     .content(changePasswordDTOAsJson));
 
     // then
-    var newPassword = readSampleUser(sampleUser.getUsername()).get().getPassword();
+    var newPassword = readSampleUser(sampleUser.username()).get().password();
     assertNotEquals(oldPassword, newPassword);
     resultActions.andExpect(status().isOk());
   }
@@ -141,7 +141,7 @@ class UserE2eTests {
     // when
     var resultActions = mockMvc.perform(delete("/user"));
     // then
-    var removedUser = readSampleUser(sampleUser.getUsername());
+    var removedUser = readSampleUser(sampleUser.username());
     assertThat(removedUser).isEmpty();
     resultActions.andExpect(status().isNoContent());
   }
@@ -167,9 +167,9 @@ class UserE2eTests {
     var newStatus = UserStatusDTO.BANNED;
     // when
     var resultActions = mockMvc
-            .perform(patch("/users/" + sampleUser.getUsername() + "/status" + "?newStatus=" + newStatus));
+            .perform(patch("/users/" + sampleUser.username() + "/status" + "?newStatus=" + newStatus));
     // then
-    var userStatus = readSampleUser(sampleUser.getUsername()).get().getStatus();
+    var userStatus = readSampleUser(sampleUser.username()).get().status();
     assertThat(userStatus).isEqualTo("BANNED");
     resultActions.andExpect(status().isOk());
   }

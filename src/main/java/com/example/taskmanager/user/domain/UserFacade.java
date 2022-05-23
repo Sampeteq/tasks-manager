@@ -29,7 +29,7 @@ public class UserFacade {
 
   public Either<UserError, UserViewDTO> registerUser(RegisterUserDTO dto) {
     log.info(dto.toString());
-    return userFactory.create(dto.getUsername(), dto.getPassword(), UserRole.COMMON)
+    return userFactory.create(dto.username(), dto.password(), UserRole.COMMON)
             .peek(viewDTO -> log.info(viewDTO.toString()))
             .peekLeft(error -> log.info(error.toString()));
   }
@@ -37,11 +37,11 @@ public class UserFacade {
   public Either<UserError, UserViewDTO> changeUserPassword(ChangeUserPasswordDTO dto) {
     log.info(dto.toString());
     return userRepository
-            .getByUsername(dto.getUsername())
-            .map(user -> user.changePassword(dto.getNewPassword(), passwordEncoder)
+            .getByUsername(dto.username())
+            .map(user -> user.changePassword(dto.newPassword(), passwordEncoder)
                     .map(userRepository::add)
                     .map(User::toView))
-            .getOrElse(Either.left(new UserNotFoundError(dto.getUsername())))
+            .getOrElse(Either.left(new UserNotFoundError(dto.username())))
             .peek(viewDTO -> log.info(viewDTO.toString()))
             .peekLeft(error -> log.info(error.toString()));
   }
@@ -49,11 +49,11 @@ public class UserFacade {
   public Either<UserError, UserViewDTO> changeUserStatus(ChangeUserStatusDTO dto) {
     log.info(dto.toString());
     return userRepository
-            .getByUsername(dto.getUsername())
-            .map(user -> user.changeStatus(UserStatus.valueOf(dto.getNewStatus().name())))
+            .getByUsername(dto.username())
+            .map(user -> user.changeStatus(UserStatus.valueOf(dto.newStatus().name())))
             .map(userRepository::add)
             .map(user -> Either.<UserError, UserViewDTO>right(user.toView()))
-            .getOrElse(Either.left(new UserNotFoundError(dto.getUsername())))
+            .getOrElse(Either.left(new UserNotFoundError(dto.username())))
             .peek(done -> log.info(done.toString()))
             .peekLeft(error -> log.info(error.toString()));
   }
