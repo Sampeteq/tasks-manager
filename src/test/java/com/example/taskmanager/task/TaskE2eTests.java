@@ -91,11 +91,11 @@ class TaskE2eTests {
     var requestBody = new ChangeTaskContentHttpDTO("newContent");
     var requestBodyAsJson = toJson(requestBody);
     // when
-    var resultActions = mockMvc.perform(patch("/tasks/" + sampleTask.getId() + "/content")
+    var resultActions = mockMvc.perform(patch("/tasks/" + sampleTask.id() + "/content")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBodyAsJson));
     // then
-    var taskContent = readSampleTask(sampleTask.getId()).get().getContent();
+    var taskContent = readSampleTask(sampleTask.id()).get().content();
     assertThat(taskContent).isEqualTo(requestBody.getNewContent());
     resultActions.andExpect(status().isOk());
   }
@@ -112,7 +112,7 @@ class TaskE2eTests {
     var error = new WrongTaskContentLengthError(requestBody.getNewContent());
     var errorAsJason= toJson(error);
     // when
-    var resultActions = mockMvc.perform(patch("/tasks/" + addSampleTask.getId() + "/content")
+    var resultActions = mockMvc.perform(patch("/tasks/" + addSampleTask.id() + "/content")
             .contentType(MediaType.APPLICATION_JSON)
             .content(requestBodyAsJson));
     // then
@@ -131,9 +131,9 @@ class TaskE2eTests {
     var newPriority = TaskPriorityDTO.MEDIUM;
     // when
     var resultActions = mockMvc
-            .perform(patch("/tasks/" + sampleTask.getId() + "/priority" + "?newPriority=" + newPriority));
+            .perform(patch("/tasks/" + sampleTask.id() + "/priority" + "?newPriority=" + newPriority));
     // then
-    var taskPriority = readSampleTask(sampleTask.getId()).get().getPriority();
+    var taskPriority = readSampleTask(sampleTask.id()).get().priority();
     assertThat(taskPriority).isEqualTo("MEDIUM");
     resultActions.andExpect(status().isOk());
   }
@@ -148,9 +148,9 @@ class TaskE2eTests {
     var newStatus = TaskStatusDTO.DONE;
     // when
     var resultActions = mockMvc
-            .perform(patch("/tasks/" + sampleTask.getId() + "/status" + "?newStatus=" + newStatus));
+            .perform(patch("/tasks/" + sampleTask.id() + "/status" + "?newStatus=" + newStatus));
     // then
-    var taskStatus = readSampleTask(sampleTask.getId()).get().getStatus();
+    var taskStatus = readSampleTask(sampleTask.id()).get().status();
     assertThat(taskStatus).isEqualTo(TaskStatusDTO.DONE.name());
     resultActions.andExpect(status().isOk());
   }
@@ -162,9 +162,9 @@ class TaskE2eTests {
     addSampleUser();
     var sampleTask = addSampleTask();
     // when
-    var resultActions = mockMvc.perform(delete( "/tasks/" + sampleTask.getId()));
+    var resultActions = mockMvc.perform(delete( "/tasks/" + sampleTask.id()));
     // then
-    var task = readSampleTask(sampleTask.getId());
+    var task = readSampleTask(sampleTask.id());
     assertThat(task).isEmpty();
     resultActions.andExpect(status().isNoContent());
   }

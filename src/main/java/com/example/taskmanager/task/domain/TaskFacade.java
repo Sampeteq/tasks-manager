@@ -27,10 +27,10 @@ public class TaskFacade {
   public Either<TaskError, TaskViewDTO> createTask(CreateTaskDTO command) {
     log.info(command.toString());
     return Task.create(
-                    command.getContent(),
-                    TaskPriority.valueOf(command.getPriority().name()),
-                    TaskStatus.valueOf(command.getStatus().name()),
-                    command.getUsername())
+                    command.content(),
+                    TaskPriority.valueOf(command.priority().name()),
+                    TaskStatus.valueOf(command.status().name()),
+                    command.username())
             .map(taskRepository::add)
             .map(Task::toView)
             .peek(dto -> log.info(dto.toString()))
@@ -39,11 +39,11 @@ public class TaskFacade {
   public Either<TaskError, TaskViewDTO> changeTaskContent(ChangeTaskContentDTO command) {
     log.info(command.toString());
     return taskRepository
-            .getById(command.getTaskId())
-            .map(task -> task.changeContent(command.getNewTaskContent())
+            .getById(command.taskId())
+            .map(task -> task.changeContent(command.newTaskContent())
                     .map(taskRepository::add)
                     .map(Task::toView))
-            .getOrElse(Either.left(new TaskNotFoundError(command.getTaskId())))
+            .getOrElse(Either.left(new TaskNotFoundError(command.taskId())))
             .peek(done -> log.info(done.toString()))
             .peekLeft(error -> log.info(error.toString()));
   }
@@ -51,11 +51,11 @@ public class TaskFacade {
   public Either<TaskError, TaskViewDTO> changeTaskPriority(ChangeTaskPriorityDTO command) {
     log.info(command.toString());
     return taskRepository
-            .getById(command.getTaskId())
-            .map(task -> task.changePriority(TaskPriority.valueOf(command.getNewPriority())))
+            .getById(command.taskId())
+            .map(task -> task.changePriority(TaskPriority.valueOf(command.newPriority())))
             .map(taskRepository::add)
             .map(task -> Either.<TaskError, TaskViewDTO>right(task.toView()))
-            .getOrElse(Either.left(new TaskNotFoundError(command.getTaskId())))
+            .getOrElse(Either.left(new TaskNotFoundError(command.taskId())))
             .peek(done -> log.info(done.toString()))
             .peekLeft(error -> log.info(error.toString()));
   }
@@ -63,11 +63,11 @@ public class TaskFacade {
   public Either<TaskError, TaskViewDTO> changeTaskStatus(ChangeTaskStatusDTO command) {
     log.info(command.toString());
     return taskRepository
-            .getById(command.getTaskId())
-            .map(task -> task.changeStatus(TaskStatus.valueOf(command.getNewStatus())))
+            .getById(command.taskId())
+            .map(task -> task.changeStatus(TaskStatus.valueOf(command.newStatus())))
             .map(taskRepository::add)
             .map(task -> Either.<TaskError, TaskViewDTO>right(task.toView()))
-            .getOrElse(Either.left(new TaskNotFoundError(command.getTaskId())))
+            .getOrElse(Either.left(new TaskNotFoundError(command.taskId())))
             .peek(done -> log.info(done.toString()))
             .peekLeft(error -> log.info(error.toString()));
   }
@@ -75,10 +75,10 @@ public class TaskFacade {
   public Either<TaskError, TaskViewDTO> removeTask(RemoveTaskDTO command) {
     log.info(command.toString());
     return taskRepository
-            .getById(command.getTaskId())
+            .getById(command.taskId())
             .peek(taskRepository::remove)
             .map(task -> Either.<TaskError, TaskViewDTO>right(task.toView()))
-            .getOrElse(Either.left(new TaskNotFoundError(command.getTaskId())))
+            .getOrElse(Either.left(new TaskNotFoundError(command.taskId())))
             .peek(done -> log.info(done.toString()))
             .peekLeft(error -> log.info(error.toString()));
   }
@@ -93,7 +93,7 @@ public class TaskFacade {
   public List<TaskViewDTO> readAllTasks(ReadAllTasksDTO dto) {
     log.info(dto.toString());
     var taskViews= taskRepository
-            .getAllByOwnerUsername(dto.getUsername())
+            .getAllByOwnerUsername(dto.username())
             .stream()
             .map(Task::toView)
             .collect(Collectors.toList());
@@ -104,7 +104,7 @@ public class TaskFacade {
   public Option<TaskViewDTO> readTaskByIdAndOwnerUsername(ReadTaskByOwnerUsernameAndIdDTO dto) {
     log.info(dto.toString());
     var result= taskRepository
-            .getTaskByOwnerUsernameAndId(dto.getOwnerUsername(), dto.getTaskId())
+            .getTaskByOwnerUsernameAndId(dto.ownerUsername(), dto.taskId())
             .map(Task::toView);
     log.info(result.toString());
     return result;
@@ -112,26 +112,26 @@ public class TaskFacade {
 
   public void saveTasksToTextFile(SaveTasksToTextFileDTO command) {
     log.info(command.toString());
-    if (userDirectoryNotExist(command.getUsername())) {
+    if (userDirectoryNotExist(command.username())) {
       try {
-        Files.createDirectory(Path.of(command.getUsername()));
+        Files.createDirectory(Path.of(command.username()));
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
-    if (userTasksFileAlreadyExists(command.getUsername(), command.getFileName())) {
+    if (userTasksFileAlreadyExists(command.username(), command.fileName())) {
       try {
-        Files.delete(userTasksFilePath(command.getUsername(), command.getFileName()));
+        Files.delete(userTasksFilePath(command.username(), command.fileName()));
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
     taskRepository
-            .getAllByOwnerUsername(command.getUsername())
+            .getAllByOwnerUsername(command.username())
             .forEach(task -> {
               try {
                 Files.writeString(
-                        userTasksFilePath(command.getUsername(), command.getFileName()),
+                        userTasksFilePath(command.username(), command.fileName()),
                         task.toString() + "\n\n",
                         StandardOpenOption.CREATE,
                         StandardOpenOption.APPEND);
